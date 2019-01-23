@@ -6,31 +6,32 @@ namespace RemiBou.CosmosDB.Migration
 {
     public class ParsedMigrationName
     {
+        private const string Prefix = "CosmosDB.Migrations.";
+
         public string FullName { get; }
         public string Type { get; }
         public string CollectionName { get; }
-        public int VersionNumber { get; }
         public string DataBaseName { get; }
         public string Name { get; }
 
         public ParsedMigrationName(string fullMigrationName)
         {
             //name should be formated like that 
-            //"CosmosDB.Migrations.{versionNumber}_{DataBaseName}_{type}_{collection?}_{name}.js"
-            FullName = fullMigrationName;
+            //"CosmosDB.Migrations.{DataBaseName}.{collection?}.{type}.{name}.js"
+            FullName = fullMigrationName.Substring(fullMigrationName.IndexOf(Prefix) + Prefix.Length);
             var split = FullName.Split('.');
-            var fileName = split[split.Length - 2].Split('_');
-            VersionNumber = int.Parse(fileName[0]);
-            DataBaseName = fileName[1];
-            Type = fileName[2];
-            if (fileName.Length == 4)
+            DataBaseName = split[0];
+            //if length equals 5 then there is a collection name
+            if (split.Length == 5)
             {
-                Name = fileName[3];
+                Type = split[3];
+                Name = split[4];
             }
             else
             {
-                CollectionName = fileName[3];
-                Name = fileName[4];
+                CollectionName = split[3];
+                Type = split[4];
+                Name = split[5];
             }
         }
     }

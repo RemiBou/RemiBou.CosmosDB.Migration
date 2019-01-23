@@ -17,9 +17,9 @@ namespace RemiBou.CosmosDB.Migration
                 });
         }
 
-        public bool Handle(string name)
+        public bool Handle(ParsedMigrationName name)
         {
-            return name.Contains("_SP_");
+            return name.Type == "StoredProcedure";
         }
     }
 }
