@@ -8,4 +8,9 @@ namespace RemiBou.CosmosDB.Migration
         bool Handle(ParsedMigrationName name);
         Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName name, string content);
     }
+
+    public class TriggerMigrationStrategy
+    {
+
+    }
 }

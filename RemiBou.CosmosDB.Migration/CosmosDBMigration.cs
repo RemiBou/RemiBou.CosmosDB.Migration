@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,13 @@ namespace RemiBou.CosmosDB.Migration
                 {
                     throw new InvalidOperationException(string.Format("No strategy found for migration '{0}", migration));
                 }
+
+                await client.CreateDatabaseIfNotExistsAsync(parsedMigration.DataBase);
+                if (parsedMigration.Collection != null)
+                {
+                    await client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(parsedMigration.DataBase.Id), parsedMigration.Collection);
+                }
+
                 await strategy.ApplyMigrationAsync(client, parsedMigration, migrationContent);
 
                 //SP

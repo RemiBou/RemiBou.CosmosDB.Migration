@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Azure.Documents;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,7 +12,13 @@ namespace RemiBou.CosmosDB.Migration
         public string FullName { get; }
         public string Type { get; }
         public string CollectionName { get; }
+        public DocumentCollection Collection
+        {
+            get;
+        }
         public string DataBaseName { get; }
+
+        public Database DataBase { get; }
         public string Name { get; }
 
         public ParsedMigrationName(string fullMigrationName)
@@ -21,17 +28,19 @@ namespace RemiBou.CosmosDB.Migration
             FullName = fullMigrationName.Substring(fullMigrationName.IndexOf(Prefix) + Prefix.Length);
             var split = FullName.Split('.');
             DataBaseName = split[0];
+            DataBase = new Database() { Id = DataBaseName };
             //if length equals 5 then there is a collection name
-            if (split.Length == 5)
+            if (split.Length == 3)
             {
-                Type = split[3];
-                Name = split[4];
+                Type = split[1];
+                Name = split[2];
             }
             else
             {
-                CollectionName = split[3];
-                Type = split[4];
-                Name = split[5];
+                CollectionName = split[1];
+                Collection = new DocumentCollection() { Id = CollectionName };
+                Type = split[2];
+                Name = split[3];
             }
         }
     }

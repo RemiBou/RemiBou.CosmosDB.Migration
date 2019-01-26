@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using System;
 using System.Threading.Tasks;
 
@@ -6,14 +7,14 @@ namespace RemiBou.CosmosDB.Migration
 {
     public class StoredProcedureMigrationStrategy : IMigrationStrategy
     {
-        public async Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName name, string content)
+        public async Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName migration, string content)
         {
             await client.UpsertStoredProcedureAsync(
-                "/dbs/" + name.DataBaseName + "/colls/" + name.CollectionName,
+                UriFactory.CreateDocumentCollectionUri(migration.DataBase.Id, migration.Collection.Id),
                 new StoredProcedure()
                 {
                     Body = content,
-                    Id = name.Name
+                    Id = migration.Name
                 });
         }
 
