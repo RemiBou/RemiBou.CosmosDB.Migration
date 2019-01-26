@@ -5,12 +5,7 @@ namespace RemiBou.CosmosDB.Migration
 {
     public interface IMigrationStrategy
     {
-        bool Handle(ParsedMigrationName name);
-        Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName name, string content);
-    }
-
-    public class TriggerMigrationStrategy
-    {
-
+        bool Handle(ParsedMigrationName migration);
+        Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName migration, string content);
     }
 }

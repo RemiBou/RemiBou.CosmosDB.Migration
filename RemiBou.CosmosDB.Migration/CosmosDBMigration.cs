@@ -15,15 +15,15 @@ namespace RemiBou.CosmosDB.Migration
     {
         private List<IMigrationStrategy> strategies = new List<IMigrationStrategy>()
         {
-            new StoredProcedureMigrationStrategy()
+            new StoredProcedureMigrationStrategy(),
+            new TriggerMigrationStrategy(),
+            new FunctionMigrationStrategy()
         };
         private readonly IDocumentClient client;
-        private readonly IOptionsSnapshot<CosmosDBMigrationOption> optionsAccessor;
 
-        public CosmosDBMigration(IDocumentClient client, IOptionsSnapshot<CosmosDBMigrationOption> optionsAccessor)
+        public CosmosDBMigration(IDocumentClient client)
         {
             this.client = client;
-            this.optionsAccessor = optionsAccessor;
         }
 
         public async Task Migrate(Assembly migrationAssembly)

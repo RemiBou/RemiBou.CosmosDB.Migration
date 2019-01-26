@@ -1,5 +1,5 @@
 ﻿// SAMPLE STORED PROCEDURE
-function sample(prefix) {
+function StoredProcedure1(prefix) {
     var collection = getContext().getCollection();
     
     // Query documents and take 1st item.
