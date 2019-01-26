@@ -12,7 +12,7 @@ This package is not published yet to nuget, but you can use the source code in y
 ## Setup
 
 - Create a folder "CosmosDB" on your project root 
-- Create a folder "Migration" on the CosmosDB folder (this should be handled by the package in the short term)
+- Create a folder "Migrations" on the CosmosDB folder (this should be handled by the package in the short term)
 - Add the following line to your csproj inside a ItemGroup tag
 ```xml
     <EmbeddedResource Include="CosmosDB\Migrations\**\*.js" />
@@ -40,6 +40,7 @@ await new CosmosDBMigration(documentClient).MigrateAsync(this.GetType().Assembly
 
 ## To do
 
+- Create nuget package
 - Change ressource folder
 - Automate mos of the setup with the package insllation
 - Send custom migration written in C#
