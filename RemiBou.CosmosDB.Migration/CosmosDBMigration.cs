@@ -11,7 +11,10 @@ using System.Threading.Tasks;
 
 namespace RemiBou.CosmosDB.Migration
 {
-    public class CosmosDBMigration
+    /// <summary>
+    /// Entry point for launching the migrations
+    /// </summary>
+    public class CosmosDBMigration : ICosmosDBMigration
     {
         private List<IMigrationStrategy> strategies = new List<IMigrationStrategy>()
         {
@@ -21,12 +24,21 @@ namespace RemiBou.CosmosDB.Migration
         };
         private readonly IDocumentClient client;
 
+        /// <summary>
+        /// Build the migrator
+        /// </summary>
+        /// <param name="client">CosmosDB Client</param>
         public CosmosDBMigration(IDocumentClient client)
         {
             this.client = client;
         }
 
-        public async Task Migrate(Assembly migrationAssembly)
+        /// <summary>
+        /// Parse the migrations and apply them to the database
+        /// </summary>
+        /// <param name="migrationAssembly">The assembly where the migration are embedded</param>
+        /// <returns></returns>
+        public async Task MigrateAsync(Assembly migrationAssembly)
         {
 
 
@@ -71,6 +83,15 @@ namespace RemiBou.CosmosDB.Migration
 
 
             }
+        }
+
+        /// <summary>
+        /// Add a custom strategy for migrating
+        /// </summary>
+        /// <param name="strategy"></param>
+        public void AddStrategy(IMigrationStrategy strategy)
+        {
+            this.strategies.Add(strategy);
         }
     }
 }

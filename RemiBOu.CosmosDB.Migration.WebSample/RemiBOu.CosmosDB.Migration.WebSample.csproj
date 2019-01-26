@@ -11,9 +11,6 @@
   </ItemGroup>
 
 
-  <ItemGroup>
-    <None Remove="CosmosDB\Migrations\TestDataBase\TestCollection\Function\Function1.js" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
