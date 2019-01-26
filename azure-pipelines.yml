@@ -25,7 +25,6 @@ steps:
     majorVersion: '0' 
     minorVersion: '0' 
     patchVersion: '0'
-    verbosityPack: Detailed
 - task: NuGetCommand@2
   inputs:
     command: push
