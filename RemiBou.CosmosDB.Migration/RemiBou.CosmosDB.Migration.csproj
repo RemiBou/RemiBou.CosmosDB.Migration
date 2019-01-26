@@ -1,7 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTags>cosmosdb azure migration</PackageTags>
+    <RepositoryUrl>https://github.com/RemiBou/RemiBou.CosmosDB.Migration</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/RemiBou/RemiBou.CosmosDB.Migration</PackageProjectUrl>
+    <Description>A package for managing versionning of your CosmosDB objects (stored procedure, trigger ...) and migrating your data as your schema changes.</Description>
+
   </PropertyGroup>
 
   <ItemGroup>
