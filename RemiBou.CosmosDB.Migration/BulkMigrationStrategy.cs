@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.CosmosDB.BulkExecutor;
 using Microsoft.Azure.CosmosDB.BulkExecutor.BulkImport;
+using Microsoft.Azure.CosmosDB.BulkExecutor.BulkUpdate;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Newtonsoft.Json.Linq;
@@ -31,6 +32,7 @@ namespace RemiBou.CosmosDB.Migration
             {
                 return;
             }
+            UnsetUpdateOperation
             // Set retry options high during initialization (default values).
             client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
             client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
