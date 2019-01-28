@@ -92,17 +92,30 @@ namespace RemiBou.CosmosDB.Migration.Tests
                 ResourceFolder = "CosmosDBBulkImport.Migrations"
             })).MigrateAsync(this.GetType().Assembly);
             await documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
-
             await new CosmosDBMigration(documentClient, Options.Create(new CosmosDBMigrationOptions()
             {
                 ResourceFolder = "CosmosDBBulkImport.Migrations"
             })).MigrateAsync(this.GetType().Assembly);
-            await documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
 
+            try
+            {
+                var db = await documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
+                throw new Exception("Failed test");
+            }
+            catch (DocumentClientException e)
+            {
+                Assert.Equal(HttpStatusCode.NotFound, e.StatusCode);
+            }
+        }
 
-            var db = await documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
+        public async Task Migrate_ShouldApplyMigrationInGivenOrder()
+        {
 
-            Assert.Equal(HttpStatusCode.OK, db.StatusCode);
+        }
+
+        public async Task Migrate_UpdateExecuted()
+        {
+
         }
 
         public void Dispose()
