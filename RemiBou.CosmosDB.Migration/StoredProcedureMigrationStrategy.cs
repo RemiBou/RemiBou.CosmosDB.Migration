@@ -7,7 +7,7 @@ namespace RemiBou.CosmosDB.Migration
 {
     internal class StoredProcedureMigrationStrategy : IMigrationStrategy
     {
-        public async Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName migration, string content)
+        public async Task ApplyMigrationAsync(DocumentClient client, ParsedMigrationName migration, string content)
         {
             await client.UpsertStoredProcedureAsync(
                 UriFactory.CreateDocumentCollectionUri(migration.DataBase.Id, migration.Collection.Id),

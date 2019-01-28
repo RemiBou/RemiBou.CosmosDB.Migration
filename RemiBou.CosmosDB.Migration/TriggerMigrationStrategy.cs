@@ -7,7 +7,7 @@ namespace RemiBou.CosmosDB.Migration
 {
     internal class TriggerMigrationStrategy : IMigrationStrategy
     {
-        public async Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName migration, string content)
+        public async Task ApplyMigrationAsync(DocumentClient client, ParsedMigrationName migration, string content)
         {
             var nameSplit = migration.Name.Split('-');
 

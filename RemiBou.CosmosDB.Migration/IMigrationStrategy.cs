@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using System.Threading.Tasks;
 
 namespace RemiBou.CosmosDB.Migration
@@ -22,6 +23,6 @@ namespace RemiBou.CosmosDB.Migration
         /// <param name="migration"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        Task ApplyMigrationAsync(IDocumentClient client, ParsedMigrationName migration, string content);
+        Task ApplyMigrationAsync(DocumentClient client, ParsedMigrationName migration, string content);
     }
 }

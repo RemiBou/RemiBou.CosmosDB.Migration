@@ -20,16 +20,17 @@ namespace RemiBou.CosmosDB.Migration
         {
             new StoredProcedureMigrationStrategy(),
             new TriggerMigrationStrategy(),
-            new FunctionMigrationStrategy()
+            new FunctionMigrationStrategy(),
+            new BulkMigrationStrategy()
         };
-        private readonly IDocumentClient client;
+        private readonly DocumentClient client;
         private readonly IOptions<CosmosDBMigrationOptions> options;
 
         /// <summary>
         /// Build the migrator
         /// </summary>
         /// <param name="client">CosmosDB Client</param>
-        public CosmosDBMigration(IDocumentClient client, IOptions<CosmosDBMigrationOptions> options)
+        public CosmosDBMigration(DocumentClient client, IOptions<CosmosDBMigrationOptions> options)
         {
             this.client = client;
             this.options = options ?? Options.Create(new CosmosDBMigrationOptions());
@@ -46,7 +47,7 @@ namespace RemiBou.CosmosDB.Migration
 
             //read all the migration embed in CosmosDB/Migrations
             var ressources = migrationAssembly.GetManifestResourceNames()
-                .Where(r => r.Contains("."+options.Value.ResourceFolder+".") && r.EndsWith(".js"))
+                .Where(r => r.Contains("."+options.Value.ResourceFolder+"."))
                 .OrderBy(r => r)
                 .ToList();
             //for each migration

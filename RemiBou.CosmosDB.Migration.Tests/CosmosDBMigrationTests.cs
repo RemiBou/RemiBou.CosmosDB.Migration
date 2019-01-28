@@ -14,7 +14,7 @@ namespace RemiBou.CosmosDB.Migration.Tests
 
         public CosmosDBMigrationTests()
         {
-            
+
             documentClient = new DocumentClient(
              new Uri(Environment.GetEnvironmentVariable("CosmosDBEndpoint") ?? "https://localhost:8081"),
              "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
@@ -70,6 +70,38 @@ namespace RemiBou.CosmosDB.Migration.Tests
                 ResourceFolder = "CosmosDBDifferentFolder.Migrations"
             })).MigrateAsync(this.GetType().Assembly);
             var db = await documentClient.ReadStoredProcedureAsync(UriFactory.CreateStoredProcedureUri("TestDataBase2", "TestCollection2", "StoredProcedure3"));
+            Assert.Equal(HttpStatusCode.OK, db.StatusCode);
+        }
+
+        [Fact]
+        public async Task Migrate_DoBulkImport()
+        {
+            await new CosmosDBMigration(documentClient, Options.Create(new CosmosDBMigrationOptions()
+            {
+                ResourceFolder = "CosmosDBBulkImport.Migrations"
+            })).MigrateAsync(this.GetType().Assembly);
+            var db = await documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
+            Assert.Equal(HttpStatusCode.OK, db.StatusCode);
+        }
+
+        [Fact]
+        public async Task Migrate_DoBulkImportOnlyOnce()
+        {
+            await new CosmosDBMigration(documentClient, Options.Create(new CosmosDBMigrationOptions()
+            {
+                ResourceFolder = "CosmosDBBulkImport.Migrations"
+            })).MigrateAsync(this.GetType().Assembly);
+            await documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
+
+            await new CosmosDBMigration(documentClient, Options.Create(new CosmosDBMigrationOptions()
+            {
+                ResourceFolder = "CosmosDBBulkImport.Migrations"
+            })).MigrateAsync(this.GetType().Assembly);
+            await documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
+
+
+            var db = await documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri("TestDataBase3", "TestCollection3", "3"));
+
             Assert.Equal(HttpStatusCode.OK, db.StatusCode);
         }
 
