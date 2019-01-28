@@ -12,6 +12,17 @@ steps:
   displayName: 'Install SDK'
   inputs:
     version: 2.2.100	
+- task: azure-cosmosdb.emulator-public-preview.run-cosmosdbemulatorcontainer.CosmosDbEmulator@2
+  displayName: 'Run Azure Cosmos DB Emulator container'
+- script: dotnet test --configuration $(buildConfiguration)  -v q --logger trx;LogFileName=test.trx
+  displayName: 'Tests'
+  env: { 'CosmosDBEndpoint': "$(CosmosDbEmulator.Endpoint)" }  # list of environment variables to add
+- task: PublishTestResults@2
+  displayName: 'Publish test results'
+  condition: in(variables['Agent.JobStatus'], 'Succeeded', 'SucceededWithIssues', 'Failed')
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
 - task: NuGetToolInstaller@0
   inputs:
     versionSpec: '4.9.2' 
