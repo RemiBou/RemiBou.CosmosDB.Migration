@@ -40,16 +40,16 @@ await new CosmosDBMigration(documentClient).MigrateAsync(this.GetType().Assembly
 - Create / Update Stored procedure
 - Create / Update Triggers
 - Create / Update User Defined Functions
+- Create nuget package
+- Change ressource folder
+- Custom Migration strategy
 
 ## To do
 
-- Create nuget package
-- Change ressource folder
-- Automate mos of the setup with the package insllation
+- Automate most of the setup with the package installation
+- Bulk Operation defined by js file
 - Send custom migration written in C#
 - Delete Database / Collection / Stored Procedure / Trigger / UDF
-- Bulk Operation defined by js file
-- Custom Migration strategy
 - Validate all the migrations before applying them
 - Log
 - create DB and collection without SP/UDF/Trigger
