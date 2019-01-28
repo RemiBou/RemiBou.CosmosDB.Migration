@@ -23,14 +23,16 @@ namespace RemiBou.CosmosDB.Migration
             new FunctionMigrationStrategy()
         };
         private readonly IDocumentClient client;
+        private readonly IOptions<CosmosDBMigrationOptions> options;
 
         /// <summary>
         /// Build the migrator
         /// </summary>
         /// <param name="client">CosmosDB Client</param>
-        public CosmosDBMigration(IDocumentClient client)
+        public CosmosDBMigration(IDocumentClient client, IOptions<CosmosDBMigrationOptions> options)
         {
             this.client = client;
+            this.options = options ?? Options.Create(new CosmosDBMigrationOptions());
         }
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace RemiBou.CosmosDB.Migration
 
             //read all the migration embed in CosmosDB/Migrations
             var ressources = migrationAssembly.GetManifestResourceNames()
-                .Where(r => r.Contains(".CosmosDB.Migrations.") && r.EndsWith(".js"))
+                .Where(r => r.Contains("."+options.Value.ResourceFolder+".") && r.EndsWith(".js"))
                 .OrderBy(r => r)
                 .ToList();
             //for each migration
@@ -58,7 +60,7 @@ namespace RemiBou.CosmosDB.Migration
                         migrationContent = await reader.ReadToEndAsync();
                     }
                 }
-                var parsedMigration = new ParsedMigrationName(migration);
+                var parsedMigration = new ParsedMigrationName(migration, options);
                 var strategy = strategies.FirstOrDefault(s => s.Handle(parsedMigration));
                 if (strategy == null)
                 {

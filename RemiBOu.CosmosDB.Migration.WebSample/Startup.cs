@@ -37,7 +37,7 @@ namespace RemiBOu.CosmosDB.Migration.WebSample
             DocumentClient documentClient = new DocumentClient(
                 new Uri("https://localhost:8081"),
                 "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
-            new CosmosDBMigration(documentClient).MigrateAsync(this.GetType().Assembly).Wait();
+            new CosmosDBMigration(documentClient, null).MigrateAsync(this.GetType().Assembly).Wait();
             services.AddSingleton(documentClient);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

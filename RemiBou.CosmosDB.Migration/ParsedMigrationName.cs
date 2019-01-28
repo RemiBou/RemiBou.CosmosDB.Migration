@@ -10,7 +10,6 @@ namespace RemiBou.CosmosDB.Migration
     /// </summary>
     public class ParsedMigrationName
     {
-        private const string Prefix = "CosmosDB.Migrations.";
 
         /// <summary>
         /// Full ressource name without the prefix : "{Top namespace}.CosmosDb.Migrations"
@@ -47,11 +46,11 @@ namespace RemiBou.CosmosDB.Migration
         /// </summary>
         public string Name { get; }
 
-        public ParsedMigrationName(string fullMigrationName)
+        public ParsedMigrationName(string fullMigrationName, Microsoft.Extensions.Options.IOptions<CosmosDBMigrationOptions> options)
         {
             //name should be formated like that 
             //"TpNameSpace.CosmosDB.Migrations.{DataBaseName}.{collection?}.{type}.{name}.js"
-            FullName = fullMigrationName.Substring(fullMigrationName.IndexOf(Prefix) + Prefix.Length);
+            FullName = fullMigrationName.Substring(fullMigrationName.IndexOf(options.Value.ResourceFolder) + options.Value.ResourceFolder.Length+1);
             var split = FullName.Split('.');
             DataBaseName = split[0];
             DataBase = new Database() { Id = DataBaseName };
