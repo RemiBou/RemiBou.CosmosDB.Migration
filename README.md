@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/remibou/toss/_apis/build/status/RemiBou.RemiBou.CosmosDB.Migration?branchName=master)](https://dev.azure.com/remibou/toss/_build/latest?definitionId=7?branchName=master)
+
 # RemiBou.CosmosDB.Migration
 A package for managing versionning of your CosmosDB objects (stored procedure, trigger ...) and migrating your data as your schema changes.
 
@@ -7,8 +9,9 @@ This package is not published yet to nuget, but you can use the source code in y
 
 ## Install Package
 
-(Add nuget command later when package published)
-
+```
+Install-Package RemiBou.CosmosDB.Migration -Version 0.0.0-CI-20190126-145359
+```
 ## Setup
 
 - Create a folder "CosmosDB" on your project root 
