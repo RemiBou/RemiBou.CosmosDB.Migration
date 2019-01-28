@@ -7,8 +7,9 @@ This package is not published yet to nuget, but you can use the source code in y
 
 ## Install Package
 
-(Add nuget command later when package published)
-
+```
+Install-Package RemiBou.CosmosDB.Migration -Version 0.0.0-CI-20190126-145359
+```
 ## Setup
 
 - Create a folder "CosmosDB" on your project root 
