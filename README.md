@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/remibou/toss/_apis/build/status/RemiBou.RemiBou.CosmosDB.Migration?branchName=master)](https://dev.azure.com/remibou/toss/_build/latest?definitionId=7?branchName=master)
+
 # RemiBou.CosmosDB.Migration
 A package for managing versionning of your CosmosDB objects (stored procedure, trigger ...) and migrating your data as your schema changes.
 
