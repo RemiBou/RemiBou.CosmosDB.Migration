@@ -49,24 +49,17 @@ namespace RemiBou.CosmosDB.Migration
         public ParsedMigrationName(string fullMigrationName, Microsoft.Extensions.Options.IOptions<CosmosDBMigrationOptions> options)
         {
             //name should be formated like that 
-            //"TpNameSpace.CosmosDB.Migrations.{DataBaseName}.{collection?}.{type}.{name}.js"
-            FullName = fullMigrationName.Substring(fullMigrationName.IndexOf(options.Value.ResourceFolder) + options.Value.ResourceFolder.Length+1);
+            //"TpNameSpace.CosmosDB.Migrations.{DataBaseName}.{collection}.{type}.{name}.js"
+            FullName = fullMigrationName.Substring(fullMigrationName.IndexOf(options.Value.MigrationFolder) + options.Value.MigrationFolder.Length + 1);
             var split = FullName.Split('.');
             DataBaseName = split[0];
             DataBase = new Database() { Id = DataBaseName };
-            //if length equals 5 then there is a collection name
-            if (split.Length == 4)
-            {
-                Type = split[1];
-                Name = split[2];
-            }
-            else
-            {
-                CollectionName = split[1];
-                Collection = new DocumentCollection() { Id = CollectionName };
-                Type = split[2];
-                Name = split[3];
-            }
+
+            CollectionName = split[1];
+            Collection = new DocumentCollection() { Id = CollectionName };
+            Type = split[2];
+            Name = split[3];
+
         }
     }
 }

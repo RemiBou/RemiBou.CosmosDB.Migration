@@ -7,7 +7,7 @@ namespace RemiBou.CosmosDB.Migration
     /// <summary>
     /// Common interface for all the migration strategies
     /// </summary>
-    public interface IMigrationStrategy
+    public interface IScriptMigrationStrategy
     {
         /// <summary>
         /// Returns true if this migration should be handled by this strategy, else false

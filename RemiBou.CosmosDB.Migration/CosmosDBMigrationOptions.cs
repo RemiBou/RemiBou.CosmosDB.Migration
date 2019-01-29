@@ -2,6 +2,6 @@
 {
     public class CosmosDBMigrationOptions
     {
-        public string ResourceFolder { get; set; } = "CosmosDB.Migrations";
+        public string MigrationFolder { get; set; } = "CosmosDB.Migrations";
     }
 }

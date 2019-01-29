@@ -1,71 +1,56 @@
 ﻿using Microsoft.Azure.CosmosDB.BulkExecutor;
-using Microsoft.Azure.CosmosDB.BulkExecutor.BulkImport;
-using Microsoft.Azure.CosmosDB.BulkExecutor.BulkUpdate;
-using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
 
 namespace RemiBou.CosmosDB.Migration
 {
-    internal class BulkMigrationStrategy : IMigrationStrategy
+
+    internal class BulkMigrationStrategy : IClassMigrationStrategy
     {
-        private static PreviousBulkContainer previousExecutions;
-        public async Task ApplyMigrationAsync(DocumentClient client, ParsedMigrationName migration, string content)
+        private readonly BulkMigrationExecutions executions;
+
+        public BulkMigrationStrategy(BulkMigrationExecutions executions)
         {
-            if (previousExecutions == null)
-            {
-                try
-                {
-                    previousExecutions = await client.ReadDocumentAsync<PreviousBulkContainer>(UriFactory.CreateDocumentUri(migration.DataBaseName, migration.CollectionName, "BulkExecutions"));
-                }
-                catch (DocumentClientException e)
-                {
-                    if (e.StatusCode != System.Net.HttpStatusCode.NotFound)
-                        throw;
-                    previousExecutions = new PreviousBulkContainer();
-                }
-            }
-            if (previousExecutions.Executions.Contains(migration.Name))
-            {
+            this.executions = executions;
+        }
+        public async Task ApplyMigrationAsync(DocumentClient client, string databaseName, string collectionName, object migration)
+        {
+            if (!await executions.CanExecuteAsync(client, databaseName, collectionName, migration.GetType().Name))
                 return;
-            }
-            UnsetUpdateOperation
+            var bulkMigration = migration as IBulkImportMigration;
             // Set retry options high during initialization (default values).
             client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
             client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
 
-            var collection = await client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(migration.DataBaseName, migration.CollectionName));
+            var collection = await client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(databaseName, collectionName));
             IBulkExecutor bulkExecutor = new BulkExecutor(client, collection);
             await bulkExecutor.InitializeAsync();
 
             // Set retries to 0 to pass complete control to bulk executor.
             client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
             client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 0;
-            var jsons = JArray.Parse(content).Select(v => v.ToString());
             await bulkExecutor.BulkImportAsync(
-                   documents: jsons,
+                   documents: await bulkMigration.GetDocuments(),
                    enableUpsert: true,
                    disableAutomaticIdGeneration: true,
                    maxConcurrencyPerPartitionKeyRange: null,
                    maxInMemorySortingBatchSize: null,
                    cancellationToken: new System.Threading.CancellationToken());
-
-            previousExecutions.Executions.Add(migration.Name);
-            await client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(migration.DataBaseName, migration.CollectionName), previousExecutions);
+            await executions.RegisterExecutedAsync(client, databaseName, collectionName, migration.GetType().Name);
         }
-        private class PreviousBulkContainer
+
+        public bool Handle(Type migrationType)
         {
-            public HashSet<string> Executions { get; set; } = new HashSet<string>();
-            public string Id { get; set; } = "BulkExecutions";
-        }
-        public bool Handle(ParsedMigrationName migration)
-        {
-            return migration.Type == "Bulk";
+            return typeof(IBulkImportMigration).IsAssignableFrom(migrationType);
         }
 
 
+    }
+
+    internal interface IClassMigrationStrategy
+    {
+        bool Handle(Type migrationType);
+        Task ApplyMigrationAsync(DocumentClient client, string databaseName, string collectionName, object migration);
     }
 }

@@ -15,17 +15,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RemiBou.CosmosDB.Migration\RemiBou.CosmosDB.Migration.csproj" />
-    <EmbeddedResource Include="CosmosDB\Migrations\**\*.*" />
-
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="CosmosDBDifferentFolder\Migrations\**\*.*" />
-    <EmbeddedResource Include="CosmosDBBulkImport\Migrations\**\*.*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="CosmosDBBulkImport\Migrations\TestDataBase3\TestCollection3\Bulk\2-Update-ChangeName.json" />
+    <EmbeddedResource Include="CosmosDB\Migrations\**\*.js" />
+    <EmbeddedResource Include="CosmosDBDifferentFolder\Migrations\**\*.js" />
+    <EmbeddedResource Include="CosmosDBBulkImport\Migrations\**\*.js" />
   </ItemGroup>
 
 

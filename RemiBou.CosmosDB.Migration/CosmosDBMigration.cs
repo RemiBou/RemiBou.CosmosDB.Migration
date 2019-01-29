@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -16,23 +17,31 @@ namespace RemiBou.CosmosDB.Migration
     /// </summary>
     public class CosmosDBMigration : ICosmosDBMigration
     {
-        private List<IMigrationStrategy> strategies = new List<IMigrationStrategy>()
+
+        private List<IScriptMigrationStrategy> scriptStrategies = new List<IScriptMigrationStrategy>()
         {
             new StoredProcedureMigrationStrategy(),
             new TriggerMigrationStrategy(),
-            new FunctionMigrationStrategy(),
-            new BulkMigrationStrategy()
+            new FunctionMigrationStrategy()
         };
+        private List<IClassMigrationStrategy> classStrategies;
+        private readonly BulkMigrationExecutions bulkPreviousExecutions;
         private readonly DocumentClient client;
+        private readonly IServiceProvider serviceProvider;
         private readonly IOptions<CosmosDBMigrationOptions> options;
 
         /// <summary>
         /// Build the migrator
         /// </summary>
         /// <param name="client">CosmosDB Client</param>
-        public CosmosDBMigration(DocumentClient client, IOptions<CosmosDBMigrationOptions> options)
+        public CosmosDBMigration(DocumentClient client, IServiceProvider serviceProvider, IOptions<CosmosDBMigrationOptions> options)
         {
+            this.bulkPreviousExecutions = new BulkMigrationExecutions();
+            classStrategies = new List<IClassMigrationStrategy>(){
+                new BulkMigrationStrategy(bulkPreviousExecutions)
+            };
             this.client = client;
+            this.serviceProvider = serviceProvider;
             this.options = options ?? Options.Create(new CosmosDBMigrationOptions());
         }
 
@@ -43,11 +52,41 @@ namespace RemiBou.CosmosDB.Migration
         /// <returns></returns>
         public async Task MigrateAsync(Assembly migrationAssembly)
         {
+            await ExecuteScriptStrategiesAsync(migrationAssembly);
+            await ExecuteClassStrategiesAsync(migrationAssembly);
+        }
 
+        private async Task ExecuteClassStrategiesAsync(Assembly migrationAssembly)
+        {
+            var migrations = migrationAssembly.DefinedTypes
+                .Where(t => t.Namespace != null)
+                .Where(t => t.Namespace.Contains(this.options.Value.MigrationFolder))
+                .Where(t => typeof(IClassMigration).IsAssignableFrom(t))
+                .OrderBy(t => t.Name)
+                .Select(t => t.AsType())
+                .ToList();
+            foreach (var migration in migrations)
+            {
+                var strategy = classStrategies.First(s => s.Handle(migration));
+                if (strategy == null)
+                {
+                    throw new InvalidOperationException(string.Format("No strategy found for migration '{0}", migration.GetType()));
+                }
+                var ns = migration.Namespace;
+                var nameSplit = ns.Substring(ns.IndexOf(options.Value.MigrationFolder) + options.Value.MigrationFolder.Length + 1).Split('.');
+                await client.CreateDatabaseIfNotExistsAsync(new Database() { Id = nameSplit[0] });
 
+                await client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(nameSplit[0]), new DocumentCollection() { Id = nameSplit[1] });
+
+                await strategy.ApplyMigrationAsync(client, nameSplit[0], nameSplit[1], ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider,migration));
+            }
+        }
+
+        private async Task ExecuteScriptStrategiesAsync(Assembly migrationAssembly)
+        {
             //read all the migration embed in CosmosDB/Migrations
             var ressources = migrationAssembly.GetManifestResourceNames()
-                .Where(r => r.Contains("."+options.Value.ResourceFolder+"."))
+                .Where(r => r.Contains("." + options.Value.MigrationFolder + "."))
                 .OrderBy(r => r)
                 .ToList();
             //for each migration
@@ -62,29 +101,18 @@ namespace RemiBou.CosmosDB.Migration
                     }
                 }
                 var parsedMigration = new ParsedMigrationName(migration, options);
-                var strategy = strategies.FirstOrDefault(s => s.Handle(parsedMigration));
+                var strategy = scriptStrategies.FirstOrDefault(s => s.Handle(parsedMigration));
                 if (strategy == null)
                 {
                     throw new InvalidOperationException(string.Format("No strategy found for migration '{0}", migration));
                 }
 
                 await client.CreateDatabaseIfNotExistsAsync(parsedMigration.DataBase);
-                if (parsedMigration.Collection != null)
-                {
-                    await client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(parsedMigration.DataBase.Id), parsedMigration.Collection);
-                }
+
+                await client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(parsedMigration.DataBase.Id), parsedMigration.Collection);
+
 
                 await strategy.ApplyMigrationAsync(client, parsedMigration, migrationContent);
-
-                //SP
-                //Trigger
-                //User
-                //Permission
-                // later : 
-                //Bulk Update
-                //BUlk Insert
-
-
             }
         }
 
@@ -92,9 +120,9 @@ namespace RemiBou.CosmosDB.Migration
         /// Add a custom strategy for migrating
         /// </summary>
         /// <param name="strategy"></param>
-        public void AddStrategy(IMigrationStrategy strategy)
+        public void AddStrategy(IScriptMigrationStrategy strategy)
         {
-            this.strategies.Add(strategy);
+            this.scriptStrategies.Add(strategy);
         }
     }
 }

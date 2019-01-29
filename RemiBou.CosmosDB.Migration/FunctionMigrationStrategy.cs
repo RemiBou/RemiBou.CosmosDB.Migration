@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace RemiBou.CosmosDB.Migration
 {
-    internal class FunctionMigrationStrategy : IMigrationStrategy
+    internal class FunctionMigrationStrategy : IScriptMigrationStrategy
     {
         public async Task ApplyMigrationAsync(DocumentClient client, ParsedMigrationName migration, string content)
         {            
